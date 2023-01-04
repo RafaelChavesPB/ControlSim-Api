@@ -5,13 +5,11 @@ import re
 
 app = Flask(__name__)
 
-
 def format_root(root):
     root = re.sub('[iIjJ]', 'j', root)
     root = re.sub('([-+])j$', '\g<1>1j', root)
     root = re.sub('^j$', '1j', root)
     return root
-
 
 def get_poly(str_input, type='poly'):
     if type == 'poly':
@@ -99,6 +97,10 @@ def process_json(data: dict) -> dict:
     sys = process_system(data['system'])
     results = process_simulations(data, sys)
     return results 
+
+@app.route('/', methods=['get'])
+def alive():
+    return 'Server Alive!'
 
 @app.route('/', methods=['post'])
 def index():
