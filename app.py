@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort
-from utils.exceptions import ValueNotInformed, ValueNotValid
+from utils.exceptions import ComplexCoef, InvalidType
 from modules.system import System
 import numpy as np
 import re
@@ -14,20 +14,20 @@ def format_root(root):
     return root
 
 
-def get_poly(str_input, type, field):
+def get_poly(str_input, type):
     if type == 'poly':
         try:
             poly = list(map(float, str_input.split()))
             return poly
         except:
-            raise ValueNotValid(field)
+            raise ValueError('1')
 
     elif type == 'roots':
         try:
             roots = list(map(format_root, str_input.split()))
             roots = list(map(complex, roots))
         except:
-            raise ValueNotValid(field)
+            raise ValueError('2')
 
         poly = [1]
         for r in roots:
@@ -35,57 +35,82 @@ def get_poly(str_input, type, field):
         poly = np.round(poly, 4)
 
         if any(np.imag(poly)):
-            raise Exception(
-                f'O polinômio resultante do {field} possui conficiêntes complexos.')
+            raise ComplexCoef('3')
 
         return np.real(poly)
 
     else:
-        raise Exception(f'Tipo do {field.lower()} não é valido')
+        raise InvalidType(f'4')
 
 
-def process_system(system_data: dict) -> System:
+def process_data(data: dict) -> System:
+    if 'system' not in data:
+        raise Exception("Dados do sistema não informados.")
 
+    system_data = data['system']
     if 'num' not in system_data:
-        raise ValueNotInformed(field="Numerador do sistema")
+        raise Exception("Numerador do sistema não informado.")
     if 'den' not in system_data:
-        raise ValueNotInformed(field="Denominador do sistema")
+        raise Exception("Denominador do sistema não informado.")
     if 'num_type' not in system_data:
-        raise ValueNotInformed(field="Tipo de numerador do sistema")
+        raise Exception("Tipo de numerador do sistema não informado.")
     if 'den_type' not in system_data:
-        raise ValueNotInformed(field="Tipo de denominador do sistema")
+        raise Exception("Tipo de denominador do sistema não informado.")
 
+    try:
+        field = 'numerador'
+        num = get_poly(system_data['num'], system_data.get('num_type'))
+        field = 'denominador'
+        den = get_poly(system_data['den'], system_data.get('den_type'))
+    except ComplexCoef:
+        raise Exception(
+            f'O polinômio resultante do {field} do sistema possui conficiêntes complexos.')
+    except InvalidType:
+        raise Exception(f'Tipo do {field} do sistema não é valido.')
+    except ValueError:
+        raise Exception(
+            f'{field.capitalize()} do sistema possui caractéres incompatíveis.')
     num = get_poly(system_data['num'], system_data.get(
-        'num_type'), "Numerador do sistema")
+        'num_type'))
     den = get_poly(system_data['den'], system_data.get(
-        'den_type'), "Denominador do sistema")
+        'den_type'))
 
     gain = system_data.get('gain', 1)
     feedback = system_data.get('feedback', False)
 
     sys = System(num, den, feedback, gain)
 
-    if 'comp' in system_data:
-        comp_data = system_data['comp']
+    if 'comp' in data:
+        comp_data = data['comp']
+        if 'num' not in comp_data:
+            raise Exception("Numerador do compensador não informado.")
+        if 'den' not in comp_data:
+            raise Exception("Denominador do compensador não informado.")
+        if 'num_type' not in comp_data:
+            raise Exception("Tipo de numerador do compensador não informado.")
+        if 'den_type' not in comp_data:
+            raise Exception(
+                "Tipo de denominador do compensador não informado.")
 
-        if 'num' not in system_data:
-            raise ValueNotInformed(field="Numerador do compensador")
-        if 'den' not in system_data:
-            raise ValueNotInformed(field="Denominador do sistema")
-        if 'num_type' not in system_data:
-            raise ValueNotInformed(field="Tipo de numerador do compensador")
-        if 'den_type' not in system_data:
-            raise ValueNotInformed(field="Tipo de denominador do compensador")
+        try:
+            field = 'numerador'
+            num = get_poly(comp_data['num'], comp_data.get('num_type'))
+            field = 'denominador'
+            den = get_poly(comp_data['den'], comp_data.get('den_type'))
+        except ComplexCoef:
+            raise Exception(
+                f'O polinômio resultante do {field} do compensador possui conficiêntes complexos.')
+        except InvalidType:
+            raise Exception(f'Tipo do {field} do compensador não é valido.')
+        except ValueError:
+            raise Exception(
+                f'{field.capitalize()} do compensador possui caractéres incompatíveis.')
 
-        num = get_poly(comp_data['num'], comp_data.get(
-            'num_type'), field="Numerador do compensador")
-        den = get_poly(comp_data['den'], comp_data.get(
-            'den_type'), field="Denominador do sistema")
         gain = comp_data.get('gain', 1)
         sys.conf_comp(num, den, gain)
 
-    if 'pid' in system_data:
-        pid_data = system_data['pid']
+    if 'pid' in data:
+        pid_data = data['pid']
         kp = pid_data.get('kp', 0)
         kd = pid_data.get('kd', 0)
         ki = pid_data.get('ki', 0)
@@ -120,18 +145,12 @@ def process_simulations(data: dict, sys: System) -> dict:
     return results
 
 
-def process_json(data: dict) -> dict:
-    sys = process_system(data['system'])
-    results = process_simulations(data, sys)
-    return results
-
-
 @app.route('/', methods=['post'])
 def index():
     try:
         data = request.get_json()
-        if 'system' in data:
-            results = process_json(data)
+        sys = process_data(data)
+        results = process_simulations(data, sys)
     except Exception as error:
         abort(400, description=str(error))
     return jsonify(results=results), 200
@@ -139,4 +158,4 @@ def index():
 
 @app.errorhandler(400)
 def json_error(e):
-    return jsonify(Error=e.description), 400
+    return jsonify(error=e.description), 400
