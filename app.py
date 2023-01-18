@@ -20,14 +20,14 @@ def get_poly(str_input, type):
             poly = list(map(float, str_input.split()))
             return poly
         except:
-            raise ValueError('1')
+            raise ValueError
 
     elif type == 'roots':
         try:
             roots = list(map(format_root, str_input.split()))
             roots = list(map(complex, roots))
         except:
-            raise ValueError('2')
+            raise ValueError
 
         poly = [1]
         for r in roots:
@@ -35,12 +35,12 @@ def get_poly(str_input, type):
         poly = np.round(poly, 4)
 
         if any(np.imag(poly)):
-            raise ComplexCoef('3')
+            raise ComplexCoef
 
         return np.real(poly)
 
     else:
-        raise InvalidType(f'4')
+        raise InvalidType
 
 
 def process_data(data: dict) -> System:
@@ -76,8 +76,7 @@ def process_data(data: dict) -> System:
         'den_type'))
 
     gain = system_data.get('gain', 1)
-    feedback = system_data.get('feedback', False)
-
+    feedback = data.get('feedback', False)
     sys = System(num, den, feedback, gain)
 
     if 'comp' in data:
@@ -94,9 +93,9 @@ def process_data(data: dict) -> System:
 
         try:
             field = 'numerador'
-            num = get_poly(comp_data['num'], comp_data.get('num_type'))
+            num_comp = get_poly(comp_data['num'], comp_data.get('num_type'))
             field = 'denominador'
-            den = get_poly(comp_data['den'], comp_data.get('den_type'))
+            den_comp = get_poly(comp_data['den'], comp_data.get('den_type'))
         except ComplexCoef:
             raise Exception(
                 f'O polinômio resultante do {field} do compensador possui conficiêntes complexos.')
@@ -106,8 +105,8 @@ def process_data(data: dict) -> System:
             raise Exception(
                 f'{field.capitalize()} do compensador possui caractéres incompatíveis.')
 
-        gain = comp_data.get('gain', 1)
-        sys.conf_comp(num, den, gain)
+        gain_comp = comp_data.get('gain', 1)
+        sys.conf_comp(num_comp, den_comp, gain_comp)
 
     if 'pid' in data:
         pid_data = data['pid']
@@ -117,6 +116,7 @@ def process_data(data: dict) -> System:
 
         if kp or kd or ki:
             sys.conf_pid(kp, ki, kd)
+
 
     return sys
 
@@ -131,7 +131,7 @@ def process_simulations(data: dict, sys: System) -> dict:
         if 'pzmap' in plots:
             results['plots']['pzmap'] = sys.pzmap()
         if 'rlocus' in plots:
-            results['plots']['pzmap'] = sys.rlocus()
+            results['plots']['rlocus'] = sys.rlocus()
 
     if 'values' in data:
         values = data['values']
