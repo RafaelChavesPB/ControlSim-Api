@@ -26,6 +26,10 @@ A simulação requerida deve ser especificáda através de um pacote Json conten
 
 ### values:
 
+
+
+* indica que o campo é obrigatório.
+
 ## Examples:
 
 	{
