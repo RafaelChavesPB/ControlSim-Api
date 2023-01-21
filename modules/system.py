@@ -5,9 +5,9 @@ import control as co
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from .pid import *
 
 matplotlib.use("Agg")
-
 
 class System:
     def __init__(self, num: list, den: list, feedback: bool = False, gain: float = 1) -> None:
