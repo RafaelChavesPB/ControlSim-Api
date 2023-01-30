@@ -57,8 +57,9 @@ class PID:
 
     def __pid_calc_paralel(self):
         #eq = kp*(1+td*s+1/(ti*s))
+        N = 3 # Filter order
         derivative_term_num = [self.kp*self.kd,0]#(kp*td*s)
-        derivative_term_den = [self.kf,1]
+        derivative_term_den = [self.kf/N,1]
         integrative_term_num = [0,self.kp] #kp/(ti*s)
         integrative_term_den = [self.ki,0]
         proportional_term_num = [0,self.kp] #kp/1
@@ -120,10 +121,6 @@ class PID:
         final_pid_num = self.__true_conv(self.pid_num,self.num)
         final_pid_den = self.__true_conv(self.pid_den,self.den)
         return final_pid_num,final_pid_den
-
-    def __get_pid_parameters(self):
-        self.run_pid()
-        return self.kp,self.ki,self.kd
 
 if __name__ == "__main__":
     test = PID(delay = 0,tune = "skogestad",num = [1],den = [0.603,1],filter = 0)
