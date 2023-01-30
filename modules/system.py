@@ -39,7 +39,7 @@ class System:
         self.__feedback = True
         self.__update_system()
 
-    def conf_pid(self, kp: float, ki: float,  kd: float) -> None:
+    def conf_pid(self, kp: float, ki: float, kd: float, tune: bool, filter_: bool, type_: str) -> None:
         if kp or ki or kd:
             self.pid = co.tf([0], [1])
             self.pid += co.tf(float(kp), [1]

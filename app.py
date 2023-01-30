@@ -113,9 +113,11 @@ def process_data(data: dict) -> System:
         kp = pid_data.get('kp', 0)
         kd = pid_data.get('kd', 0)
         ki = pid_data.get('ki', 0)
-
+        tune = pid_data.get('tune', False)
+        filter_ = pid_data.get('filter', False)
+        type_ = pid_data.get('type','parallel')
         if kp or kd or ki:
-            sys.conf_pid(kp, ki, kd)
+            sys.conf_pid(kp, ki, kd, tune, filter_, type_)
 
 
     return sys
