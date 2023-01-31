@@ -39,15 +39,16 @@ class System:
         self.__feedback = True
         self.__update_system()
 
-    def conf_pid(self, kp: float, ki: float, kd: float, tune: bool, filter_: bool, type_: str) -> None:
-        if kp or ki or kd:
-            self.pid = co.tf([0], [1])
-            self.pid += co.tf(float(kp), [1]
-                              ) if kp and kp != '0' else co.tf([0], [1])
-            self.pid += co.tf((float(ki)), [1, 0]
-                              ) if ki and ki != '0' else co.tf([0], [1])
-            self.pid += co.tf([float(kd), 0], [1]
-                              ) if kd and kd != '0' else co.tf([0], [1])
+    def conf_pid(self, kp: float, ki: float,  kd: float, pid_type: str, filter: str, tune: str) -> None:
+        """ Essa função usa a classe PID para achar o pid, os parâmetros kp,ki,kd podem ser qualquer coisa se
+        o tune for "sim", pois o tune irá cacular esses parâmetros, caso contrário o usuário deverá passar valores
+        que fazem sentido para esses parâmetros, um pid desintonizado pode fazer a curva divergir, o parâmetros 
+        tune deve ser skogestad ou não, o tipo de pid deve ser "series" ou "parallel", e o filtro deve ser um valor.
+        Se o filtro não for desejado pelo usuário deve ser passado 0."""
+
+        pid_object = PID(num = self.__num, den = self.__den,kp = kp, ki = ki,kd = kd,tune = tune, type = pid_type, filter = filter)
+        pid_num,pid_den = pid_object.get_pid_only()
+        self.__pid = co.tf(pid_num,pid_den)
         self.__update_system()
 
     def conf_comp(self, num: list, den: list, gain: float = 1) -> None:
