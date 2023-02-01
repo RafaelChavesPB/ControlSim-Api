@@ -9,8 +9,11 @@ from .pid import *
 
 matplotlib.use("Agg")
 
+
 class System:
     def __init__(self, num: list, den: list, feedback: bool = False, gain: float = 1) -> None:
+        self.__num = num
+        self.__den = den
         self.__gs = gain*co.tf(num, den)
         self.__comp = co.tf(1, 1)
         self.__pid = co.tf(1, 1)
@@ -46,9 +49,10 @@ class System:
         tune deve ser skogestad ou não, o tipo de pid deve ser "series" ou "parallel", e o filtro deve ser um valor.
         Se o filtro não for desejado pelo usuário deve ser passado 0."""
 
-        pid_object = PID(num = self.__num, den = self.__den,kp = kp, ki = ki,kd = kd,tune = tune, type = pid_type, filter = filter)
-        pid_num,pid_den = pid_object.get_pid_only()
-        self.__pid = co.tf(pid_num,pid_den)
+        pid_object = PID(num=self.__num, den=self.__den, kp=kp,
+                         ki=ki, kd=kd, tune=tune, type=pid_type, filter=filter)
+        pid_num, pid_den = pid_object.get_pid_only()
+        self.__pid = co.tf(pid_num, pid_den)
         self.__update_system()
 
     def conf_comp(self, num: list, den: list, gain: float = 1) -> None:

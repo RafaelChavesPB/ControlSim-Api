@@ -46,7 +46,6 @@ def get_poly(str_input, type):
 
 
 def process_data(data: dict) -> System:
-    print(data)
     if 'system' not in data:
         raise Exception("Dados do sistema não informados.")
 
@@ -118,10 +117,9 @@ def process_data(data: dict) -> System:
         ki = pid_data.get('ki', 0)
         tune = pid_data.get('tune', False)
         filter_ = pid_data.get('filter', False)
-        type_ = pid_data.get('type','parallel')
+        type_ = pid_data.get('type', 'parallel')
         if kp or kd or ki:
-            sys.conf_pid(kp, ki, kd, tune, filter_, type_)
-
+            sys.conf_pid(kp, ki, kd, type_, filter_, tune)
 
     return sys
 
@@ -152,13 +150,17 @@ def process_simulations(data: dict, sys: System) -> dict:
 
 @app.route('/', methods=['post'])
 def index():
-    try:
-        data = request.get_json()
-        sys = process_data(data)
-        results = process_simulations(data, sys)
-    except Exception as error:
-        abort(400, description=str(error))
+    data = request.get_json()
+    sys = process_data(data)
+    results = process_simulations(data, sys)
     return jsonify(results=results), 200
+    # try:
+    #     data = request.get_json()
+    #     sys = process_data(data)
+    #     results = process_simulations(data, sys)
+    # except Exception as error:
+    #     abort(400, description=str(error))
+    # return jsonify(results=results), 200
 
 
 @app.errorhandler(400)
