@@ -77,7 +77,7 @@ def process_data(data: dict) -> System:
     den = get_poly(system_data['den'], system_data.get(
         'den_type'))
 
-    gain = int(system_data.get('gain', 1))
+    gain = float(system_data.get('gain', 1))
     feedback = data.get('feedback', False)
     sys = System(num, den, feedback, gain)
 
@@ -107,14 +107,14 @@ def process_data(data: dict) -> System:
             raise Exception(
                 f'{field.capitalize()} do compensador possui caractéres incompatíveis.')
 
-        gain_comp = comp_data.get('gain', 1)
+        gain_comp = float(comp_data.get('gain', 1))
         sys.conf_comp(num_comp, den_comp, gain_comp)
 
     if 'pid' in data:
         pid_data = data['pid']
-        kp = pid_data.get('kp', 0)
-        kd = pid_data.get('kd', 0)
-        ki = pid_data.get('ki', 0)
+        kp = float(pid_data.get('kp', 0))
+        kd = float(pid_data.get('kd', 0))
+        ki = float(pid_data.get('ki', 0))
         tune = pid_data.get('tune', False)
         filter_ = pid_data.get('filter', False)
         type_ = pid_data.get('type', 'parallel')
@@ -150,17 +150,17 @@ def process_simulations(data: dict, sys: System) -> dict:
 
 @app.route('/', methods=['post'])
 def index():
-    data = request.get_json()
-    sys = process_data(data)
-    results = process_simulations(data, sys)
-    return jsonify(results=results), 200
-    # try:
-    #     data = request.get_json()
-    #     sys = process_data(data)
-    #     results = process_simulations(data, sys)
-    # except Exception as error:
-    #     abort(400, description=str(error))
+    # data = request.get_json()
+    # sys = process_data(data)
+    # results = process_simulations(data, sys)
     # return jsonify(results=results), 200
+    try:
+        data = request.get_json()
+        sys = process_data(data)
+        results = process_simulations(data, sys)
+    except Exception as error:
+        abort(400, description=str(error))
+    return jsonify(results=results), 200
 
 
 @app.errorhandler(400)
