@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, abort
+from flask_cors import CORS
 from utils.exceptions import ComplexCoef, InvalidType
 from modules.system import System
 import numpy as np
 import re
 
 app = Flask(__name__)
+CORS(app)
 
 
 def format_root(root):
@@ -44,6 +46,7 @@ def get_poly(str_input, type):
 
 
 def process_data(data: dict) -> System:
+    print(data)
     if 'system' not in data:
         raise Exception("Dados do sistema não informados.")
 
@@ -75,7 +78,7 @@ def process_data(data: dict) -> System:
     den = get_poly(system_data['den'], system_data.get(
         'den_type'))
 
-    gain = system_data.get('gain', 1)
+    gain = int(system_data.get('gain', 1))
     feedback = data.get('feedback', False)
     sys = System(num, den, feedback, gain)
 
