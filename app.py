@@ -136,31 +136,22 @@ def process_simulations(data: dict, sys: System) -> dict:
         if 'rlocus' in plots:
             results['plots']['rlocus'] = sys.rlocus()
 
-    if 'values' in data:
-        values = data['values']
-        if 'system' in values:
-            results['values']['system'] = str(sys)
-        if 'zeros' in values:
-            results['values']['zeros'] = sys.zeros()
-        if 'poles' in values:
-            results['values']['poles'] = sys.poles()
+        results['values']['system'] = str(sys)
+        results['values']['zeros'] = sys.zeros()
+        results['values']['poles'] = sys.poles()
 
     return results
 
 
 @app.route('/', methods=['post'])
 def index():
-    # data = request.get_json()
-    # sys = process_data(data)
-    # results = process_simulations(data, sys)
-    # return jsonify(results=results), 200
     try:
         data = request.get_json()
         sys = process_data(data)
         results = process_simulations(data, sys)
     except Exception as error:
         abort(400, description=str(error))
-    return jsonify(results=results), 200
+    return jsonify(results), 200
 
 
 @app.errorhandler(400)
