@@ -66,12 +66,12 @@ def process_data(data: dict) -> System:
         den = get_poly(system_data['den'], system_data.get('den_type'))
     except ComplexCoef:
         raise Exception(
-            f'O polinômio resultante do {field} do sistema possui conficiêntes complexos.')
+            f'O polinômio resultante no {field} do sistema possui conficientes complexos.')
     except InvalidType:
         raise Exception(f'Tipo do {field} do sistema não é valido.')
     except ValueError:
         raise Exception(
-            f'{field.capitalize()} do sistema possui caractéres incompatíveis.')
+            f'{field.capitalize()} do sistema possui caracteres incompatíveis.')
     num = get_poly(system_data['num'], system_data.get(
         'num_type'))
     den = get_poly(system_data['den'], system_data.get(
@@ -100,12 +100,12 @@ def process_data(data: dict) -> System:
             den_comp = get_poly(comp_data['den'], comp_data.get('den_type'))
         except ComplexCoef:
             raise Exception(
-                f'O polinômio resultante do {field} do compensador possui conficiêntes complexos.')
+                f'O polinômio resultante no {field} do compensador possui conficientes complexos.')
         except InvalidType:
             raise Exception(f'Tipo do {field} do compensador não é valido.')
         except ValueError:
             raise Exception(
-                f'{field.capitalize()} do compensador possui caractéres incompatíveis.')
+                f'{field.capitalize()} do compensador possui caracteres incompatíveis.')
 
         gain_comp = float(comp_data.get('gain', 1))
         sys.conf_comp(num_comp, den_comp, gain_comp)
@@ -136,7 +136,7 @@ def process_simulations(data: dict, sys: System) -> dict:
         if 'rlocus' in plots:
             results['plots']['rlocus'] = sys.rlocus()
 
-        results['values']['system'] = str(sys)
+        results['values']['tf'] = str(sys)
         results['values']['zeros'] = sys.zeros()
         results['values']['poles'] = sys.poles()
 
