@@ -7,6 +7,7 @@ import re
 app = Flask(__name__)
 
 
+
 def format_root(root):
     root = re.sub('[iIjJ]', 'j', root)
     root = re.sub('([-+])j$', '\g<1>1j', root)
