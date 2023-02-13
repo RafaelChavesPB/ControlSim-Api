@@ -157,7 +157,7 @@ def index():
     return jsonify(results=results), 200
 
 @app.route('/linsca/aplicacao', methods=['post'])
-def index():
+def production():
     try:
         data = request.get_json()
         sys = process_data(data)
