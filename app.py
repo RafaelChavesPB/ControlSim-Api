@@ -156,7 +156,7 @@ def index():
         abort(400, description=str(error))
     return jsonify(results=results), 200
 
-@app.route('/linsca/aplicacao', methods=['post'])
+@app.route('/linsca/aplicacao/', methods=['post'])
 def production():
     try:
         data = request.get_json()
