@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify, abort
+from flask_cors import CORS
 from utils.exceptions import ComplexCoef, InvalidType
 from modules.system import System
 import numpy as np
 import re
 
 app = Flask(__name__)
+CORS(app)
 
 
 
@@ -65,18 +67,18 @@ def process_data(data: dict) -> System:
         den = get_poly(system_data['den'], system_data.get('den_type'))
     except ComplexCoef:
         raise Exception(
-            f'O polinômio resultante do {field} do sistema possui conficiêntes complexos.')
+            f'O polinômio resultante no {field} do sistema possui conficientes complexos.')
     except InvalidType:
         raise Exception(f'Tipo do {field} do sistema não é valido.')
     except ValueError:
         raise Exception(
-            f'{field.capitalize()} do sistema possui caractéres incompatíveis.')
+            f'{field.capitalize()} do sistema possui caracteres incompatíveis.')
     num = get_poly(system_data['num'], system_data.get(
         'num_type'))
     den = get_poly(system_data['den'], system_data.get(
         'den_type'))
 
-    gain = system_data.get('gain', 1)
+    gain = float(system_data.get('gain', 1))
     feedback = data.get('feedback', False)
     sys = System(num, den, feedback, gain)
 
@@ -99,25 +101,26 @@ def process_data(data: dict) -> System:
             den_comp = get_poly(comp_data['den'], comp_data.get('den_type'))
         except ComplexCoef:
             raise Exception(
-                f'O polinômio resultante do {field} do compensador possui conficiêntes complexos.')
+                f'O polinômio resultante no {field} do compensador possui conficientes complexos.')
         except InvalidType:
             raise Exception(f'Tipo do {field} do compensador não é valido.')
         except ValueError:
             raise Exception(
-                f'{field.capitalize()} do compensador possui caractéres incompatíveis.')
+                f'{field.capitalize()} do compensador possui caracteres incompatíveis.')
 
-        gain_comp = comp_data.get('gain', 1)
+        gain_comp = float(comp_data.get('gain', 1))
         sys.conf_comp(num_comp, den_comp, gain_comp)
 
     if 'pid' in data:
         pid_data = data['pid']
-        kp = pid_data.get('kp', 0)
-        kd = pid_data.get('kd', 0)
-        ki = pid_data.get('ki', 0)
-
+        kp = float(pid_data.get('kp', 0))
+        kd = float(pid_data.get('kd', 0))
+        ki = float(pid_data.get('ki', 0))
+        tune = pid_data.get('tune', False)
+        filter_ = pid_data.get('filter', False)
+        type_ = pid_data.get('type', 'parallel')
         if kp or kd or ki:
-            sys.conf_pid(kp, ki, kd)
-
+            sys.conf_pid(kp, ki, kd, type_, filter_, tune)
 
     return sys
 
@@ -134,14 +137,9 @@ def process_simulations(data: dict, sys: System) -> dict:
         if 'rlocus' in plots:
             results['plots']['rlocus'] = sys.rlocus()
 
-    if 'values' in data:
-        values = data['values']
-        if 'system' in values:
-            results['values']['system'] = str(sys)
-        if 'zeros' in values:
-            results['values']['zeros'] = sys.zeros()
-        if 'poles' in values:
-            results['values']['poles'] = sys.poles()
+        results['values']['tf'] = str(sys)
+        results['values']['zeros'] = sys.zeros()
+        results['values']['poles'] = sys.poles()
 
     return results
 
@@ -154,7 +152,7 @@ def index():
         results = process_simulations(data, sys)
     except Exception as error:
         abort(400, description=str(error))
-    return jsonify(results=results), 200
+    return jsonify(results), 200
 
 @app.route('/linsca/aplicacao/', methods=['post'])
 def production():
