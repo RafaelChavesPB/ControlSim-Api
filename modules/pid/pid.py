@@ -1,6 +1,6 @@
-import tunning_methods
 import control as ct
 import matplotlib.pyplot as plt
+import tunning_methods
 
 
 class PID:
@@ -9,17 +9,17 @@ class PID:
         só é necessário o numerador e denominador para funcionar, entretanto o construtor iŕa 
         supor parâmetros, os valores padrões são: filtro: 0, type: paralelo, delay:0, tune :0, e 1 para
         os valores de kp,ki e kd se não forem passados"""
-        self.kp = 1 if "kp" not in kwargs else kwargs["kp"]
-        self.ki = 1 if "ki" not in kwargs else kwargs["ki"]
-        self.kd = 1 if "kd" not in kwargs else kwargs["kd"]
+        self.kp = 1 if "kp" not in kwargs else float(kwargs["kp"])
+        self.ki = 1 if "ki" not in kwargs else float(kwargs["ki"])
+        self.kd = 1 if "kd" not in kwargs else float(kwargs["kd"])
         self.type = "parallel" if "type" not in kwargs else kwargs["type"]
-        self.kf = 0 if "filter" not in kwargs else kwargs["filter"]
+        self.kf = 0 if "filter" not in kwargs else int(kwargs["filter"])
         self.pid_den = []
         self.pid_num = []
         self.num = kwargs["num"]
         self.den = kwargs["den"]
         self.tune = 0 if "tune" not in kwargs else kwargs["tune"]
-        self.delay = 0 if "delay" not in kwargs else kwargs["delay"]
+        self.delay = 0 if "delay" not in kwargs else float(kwargs["delay"])
         self.aproximation_pade()
         self.tune_method()
 
@@ -166,6 +166,6 @@ class PID:
 
 
 if __name__ == "__main__":
-    test = PID(num=[1], den=[0.603, 1], tune = "skogestad", filter = 1)
+    test = PID(num=[1], den=[0.603, 1], tune = "skogestad", filter = 0, )
     num,den = test.get_pid_with_tf()
     print(num,den)
