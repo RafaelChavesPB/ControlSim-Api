@@ -1,25 +1,25 @@
-from . import tunning_methods
 import control as ct
 import matplotlib.pyplot as plt
+import tunning_methods
 
 
 class PID:
     def __init__(self, **kwargs):
-        self.kp = 0
-        self.ki = 0
-        self.kd = 0
-        self.type = kwargs["type"]
-        self.kf = kwargs["filter"]
+        """ O construtor dessa função é bastante leniente, apesar de existir vários parâmetros
+        só é necessário o numerador e denominador para funcionar, entretanto o construtor iŕa 
+        supor parâmetros, os valores padrões são: filtro: 0, type: paralelo, delay:0, tune :0, e 1 para
+        os valores de kp,ki e kd se não forem passados"""
+        self.kp = 1 if "kp" not in kwargs else float(kwargs["kp"])
+        self.ki = 1 if "ki" not in kwargs else float(kwargs["ki"])
+        self.kd = 1 if "kd" not in kwargs else float(kwargs["kd"])
+        self.type = "parallel" if "type" not in kwargs else kwargs["type"]
+        self.kf = 0 if "filter" not in kwargs else int(kwargs["filter"])
         self.pid_den = []
         self.pid_num = []
-        self.tune = 0
         self.num = kwargs["num"]
         self.den = kwargs["den"]
-        self.kp = kwargs["kp"]
-        self.ki = kwargs["ki"]
-        self.kd = kwargs["kd"]
-        self.tune = kwargs["tune"]
-        self.delay = 0 if "delay" not in kwargs else kwargs["delay"]
+        self.tune = 0 if "tune" not in kwargs else kwargs["tune"]
+        self.delay = 0 if "delay" not in kwargs else float(kwargs["delay"])
         self.aproximation_pade()
         self.tune_method()
 
@@ -158,8 +158,14 @@ class PID:
             raise SystemError(
                 "Tipo de PID inexistente, cheque o nome passado, somente series ou parallel.")
         return self.pid_num, self.pid_den
+    def get_pid_with_tf(self):
+        pidd_num,pidd_den = self.get_pid_only()
+        self.num_final = self.true_conv(pidd_num,self.num)
+        self.den_final = self.true_conv(pidd_den,self.den)
+        return self.num_final,self.den_final
 
 
 if __name__ == "__main__":
-    test = PID(delay=0, tune="skogestad", num=[1], den=[0.603, 1], filter=0)
-    test.get_pid()
+    test = PID(num=[1], den=[0.603, 1], tune = "skogestad", filter = 0, )
+    num,den = test.get_pid_with_tf()
+    print(num,den)
