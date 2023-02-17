@@ -144,7 +144,7 @@ def process_simulations(data: dict, sys: System) -> dict:
     return results
 
 
-@app.route('/', methods=['post'])
+@app.route('/api/', methods=['post'])
 def index():
     try:
         data = request.get_json()
@@ -153,17 +153,6 @@ def index():
     except Exception as error:
         abort(400, description=str(error))
     return jsonify(results), 200
-
-@app.route('/linsca/aplicacao/', methods=['post'])
-def production():
-    try:
-        data = request.get_json()
-        sys = process_data(data)
-        results = process_simulations(data, sys)
-    except Exception as error:
-        abort(400, description=str(error))
-    return jsonify(results=results), 200
-
 
 @app.errorhandler(400)
 def json_error(e):
