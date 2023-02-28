@@ -1,5 +1,4 @@
 from io import BytesIO
-from turtle import delay
 from urllib import parse
 from base64 import b64encode
 import control as co
@@ -10,34 +9,26 @@ from . import pid
 
 matplotlib.use("Agg")
 
+
 class System:
-    def __init__(self, num: list, den: list, feedback: bool = False, gain: float = 1, delay : int = 0) -> None:
+    def __init__(self, num: list, den: list, feedback: bool = False, gain: float = 1) -> None:
         self.__num = num
         self.__den = den
-        self.__delay = delay
         self.__gs = gain*co.tf(num, den)
         self.__comp = co.tf(1, 1)
         self.__pid = co.tf(1, 1)
-        self.__pade = co.tf(1 , 1)
         self.__feedback = feedback
         self.__kgain = 1
-        self.__put_delay()
         self.__update_system()
 
     def __update_system(self) -> None:
-        self.__open_loop = self.__kgain*self.__gs*self.__comp*self.__pid*self.__pade
+        self.__open_loop = self.__kgain*self.__gs*self.__comp*self.__pid
         self.__closed_loop = co.feedback(self.__open_loop)
         self.__system = self.__closed_loop if self.__feedback else self.__open_loop
 
     def conf_gs(self, num: list, den: list, gain: float = 1) -> None:
         self.__gs = gain*co.tf(num, den)
         self.__update_system()
-
-    def __put_delay(self) -> None:
-        if self.__delay > 0:
-            num,den = co.pade(T = self.__delay, n = 3, numdeg = 3) # mude isso se você quiser mudar o grau do aproximador do padé
-            self.__pade = co.tf(num,den)
-        
 
     def conf_kgain(self, k: float):
         self.__kgain = k
@@ -59,7 +50,7 @@ class System:
         Se o filtro não for desejado pelo usuário deve ser passado 0."""
 
         pid_object = pid.PID(num=self.__num, den=self.__den, kp=kp,
-                         ki=ki, kd=kd, tune=tune, type=pid_type, filter=filter, delay = self.__delay)
+                         ki=ki, kd=kd, tune=tune, type=pid_type, filter=filter)
         pid_num, pid_den = pid_object.get_pid_only()
         self.__pid = co.tf(pid_num, pid_den)
         self.__update_system()
