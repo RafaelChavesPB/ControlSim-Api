@@ -35,7 +35,7 @@ class System:
 
     def __put_delay(self) -> None:
         if self.__delay > 0:
-            num,den = co.pade(T = self.__delay, n = 3, numdeg = 3)
+            num,den = co.pade(T = self.__delay, n = 3, numdeg = 3) # mude isso se você quiser mudar o grau do aproximador do padé
             self.__pade = co.tf(num,den)
         
 
