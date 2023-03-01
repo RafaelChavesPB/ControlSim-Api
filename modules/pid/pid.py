@@ -1,7 +1,6 @@
 import control as ct
 import matplotlib.pyplot as plt
-#from . import tunning_methods
-import tunning_methods
+from . import tunning_methods
 
 
 class PID:
