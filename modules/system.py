@@ -48,7 +48,6 @@ class System:
         que fazem sentido para esses parâmetros, um pid desintonizado pode fazer a curva divergir, o parâmetros 
         tune deve ser skogestad ou não, o tipo de pid deve ser "series" ou "parallel", e o filtro deve ser um valor.
         Se o filtro não for desejado pelo usuário deve ser passado 0."""
-
         pid_object = pid.PID(num=self.__num, den=self.__den, kp=kp,
                          ki=ki, kd=kd, tune=tune, type=pid_type, filter=filter)
         pid_num, pid_den = pid_object.get_pid_only()

@@ -168,4 +168,3 @@ class PID:
 if __name__ == "__main__":
     test = PID(num=[1], den=[0.603, 1], tune = "skogestad", filter = 0, )
     num,den = test.get_pid_with_tf()
-    print(num,den)

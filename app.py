@@ -119,7 +119,7 @@ def process_data(data: dict) -> System:
         tune = pid_data.get('tune', False)
         filter_ = pid_data.get('filter', False)
         type_ = pid_data.get('type', 'parallel')
-        if kp or kd or ki:
+        if kp or kd or ki or tune:
             sys.conf_pid(kp, ki, kd, type_, filter_, tune)
 
     return sys
@@ -157,3 +157,7 @@ def index():
 @app.errorhandler(400)
 def json_error(e):
     return jsonify(error=e.description), 400
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
