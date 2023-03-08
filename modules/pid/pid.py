@@ -161,7 +161,5 @@ class PID:
 
 
 if __name__ == "__main__":
-    pid_test = PID(num=[2], den=[2, 0, 0], tune = "skogestad", filter = 0, type = "parallel" )
-    num,den = pid_test.get_pid_with_tf()
-    print(num,den)
-    pid_test.plot_graphs()
+    test = PID(num=[1], den=[0.603, 1], tune = "skogestad", filter = 0, )
+    num,den = test.get_pid_with_tf()
