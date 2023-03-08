@@ -20,7 +20,6 @@ class PID:
         self.den = kwargs["den"]
         self.tune = 0 if "tune" not in kwargs else kwargs["tune"]
         self.delay = 0 if "delay" not in kwargs else float(kwargs["delay"])
-        self.aproximation_pade()
         self.tune_method()
 
     def delay_representation(self, delay):
@@ -29,12 +28,6 @@ class PID:
         den_delay = [delay, 2]
         return num_delay, den_delay
 
-    def aproximation_pade(self):  # always run this function
-        if self.delay:
-            num_delay, den_delay = self.delay_representation(self.delay)
-            self.num = self.true_conv(self.num, num_delay)
-            self.den = self.true_conv(self.den, den_delay)
-
     def tune_method(self):
         if self.tune == "IMC":
             self.kp, self.ki, self.kd = tunning_methods.IMC_method(
@@ -42,7 +35,7 @@ class PID:
         if self.tune == "skogestad":
             self.kp, self.ki, self.kd = tunning_methods.skogestad_method(
                 self.num, self.den)
-        list_names = ["ziegle_pi", "ziegle,pid",
+        list_names = ["ziegle_pi", "ziegle_pid",
                       "chr_pi", "chr_pid", "chr20_pi", "chr20_pid"]
         if self.tune == "auto":
             self.kp = 1.275
@@ -63,8 +56,9 @@ class PID:
                         self.true_conv(self.pid_den, self.den))
         sys_pid = ct.feedback(sys_pid, sign=-1)
         t2, y2 = ct.step_response(sys_pid)
-        plt.plot(t2, y2)
-        plt.plot(t1, y1)
+        plt.plot(t2, y2, label = "sistema com o pid", linewidth = 2)
+        plt.plot(t1, y1, label = "sistema sem o pid")
+        plt.legend()
         plt.show()
 
     def pid_calc_serie(self):
@@ -80,7 +74,7 @@ class PID:
         N = 3
         #eq = kp*(1+td*s+1/(ti*s))
         derivative_term_num = [self.kp*self.kd, 0]  # (kp*td*s)
-        derivative_term_den = [self.kf/N, 1]
+        derivative_term_den = [self.kd/N, 1]
         integrative_term_num = [0, self.kp]  # kp/(ti*s)
         integrative_term_den = [self.ki, 0]
         proportional_term_num = [0, self.kp]  # kp/1
@@ -146,7 +140,7 @@ class PID:
         return final_pid_num, final_pid_den
 
     def get_pid_parameters(self):
-        self.run_pid()
+        num,den = self.get_pid_only()
         return self.kp, self.ki, self.kd
 
     def get_pid_only(self):
@@ -163,9 +157,9 @@ class PID:
         self.num_final = self.true_conv(pidd_num,self.num)
         self.den_final = self.true_conv(pidd_den,self.den)
         return self.num_final,self.den_final
+    
 
 
 if __name__ == "__main__":
     test = PID(num=[1], den=[0.603, 1], tune = "skogestad", filter = 0, )
     num,den = test.get_pid_with_tf()
-    print(num,den)
