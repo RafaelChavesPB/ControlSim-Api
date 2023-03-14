@@ -72,7 +72,7 @@ def skogestad_fourth_case(num,den):
     t1 = 1/-x1
     t2 = 1/-x2
     k1 = 4
-    tc = 0.7*t1
+    tc = 0.7*(t1)
     kp = t1/(const*tc)
     try:
         ki = min(k1*tc,t1)
@@ -145,14 +145,8 @@ def skogestad_method(num,den):
     return kp,ki,kd
 
 def calcule_parameters(num,den):
-    sys = ct.tf(num,den)
-    sys_feed = ct.feedback(sys, sign = -1)
-    t,y = ct.step_response(sys_feed)
-    delay = 0
-    for i in range(len(y)-1):
-        if y[i+1]-y[i]!=0:
-            break
-        delay +=t[i]
+    num = remove_left_zeros(num)
+    den = remove_left_zeros(den)
     new_den = [x/den[-2] for x in den]
     time_const = 1/new_den[-1]
     const = num[-1]/(new_den[-1]*den[-2])
