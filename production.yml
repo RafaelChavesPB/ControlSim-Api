@@ -1,0 +1,8 @@
+version: '3'
+services:
+  back:
+    container_name: controlsim-api
+    build: .
+    ports:
+      -  "8082:5000"
+
