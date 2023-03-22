@@ -13,14 +13,22 @@ class PID:
         self.ki = 1 if "ki" not in kwargs else float(kwargs["ki"])
         self.kd = 1 if "kd" not in kwargs else float(kwargs["kd"])
         self.type = "parallel" if "type" not in kwargs else kwargs["type"]
-        self.kf = 0 if "filter" not in kwargs else int(kwargs["filter"])
+        self.filter = 0 if "filter" not in kwargs else int(kwargs["filter"])
         self.pid_den = []
         self.pid_num = []
         self.num = kwargs["num"]
         self.den = kwargs["den"]
         self.tune = 0 if "tune" not in kwargs else kwargs["tune"]
         self.delay = 0 if "delay" not in kwargs else float(kwargs["delay"])
+        self.filter_order = 3 if "filter_order" not in kwargs else float(kwargs["filter_order"])
+        self.kf = 0
         self.tune_method()
+        self.check_filter()
+
+    def check_filter(self):
+        if self.filter:
+            self.kf = self.kp/self.filter_order
+
 
     def delay_representation(self, delay):
         #delay: (2-s*td)/(2+s*td)
@@ -74,7 +82,7 @@ class PID:
         N = 3
         #eq = kp*(1+td*s+1/(ti*s))
         derivative_term_num = [self.kp*self.kd, 0]  # (kp*td*s)
-        derivative_term_den = [self.kd/N, 1]
+        derivative_term_den = [self.kf, 1]
         integrative_term_num = [0, self.kp]  # kp/(ti*s)
         integrative_term_den = [self.ki, 0]
         proportional_term_num = [0, self.kp]  # kp/1
@@ -127,6 +135,7 @@ class PID:
 
     def run_pid_paralel(self):
         self.tune_method()
+        self.check_filter()
         self.pid_calc_paralel()
         final_pid_num = self.true_conv(self.pid_num, self.num)
         final_pid_den = self.true_conv(self.pid_den, self.den)
@@ -134,6 +143,7 @@ class PID:
 
     def get_pid_serie(self):
         self.tune_method()
+        self.check_filter()
         self.pid_calc_serie()
         final_pid_num = self.true_conv(self.pid_num, self.num)
         final_pid_den = self.true_conv(self.pid_den, self.den)
