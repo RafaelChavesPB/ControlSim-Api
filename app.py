@@ -138,7 +138,7 @@ def process_simulations(data: dict, sys: System) -> dict:
     if 'plots' in data:
         plots = data['plots']
         if 'impulse_response' in plots:
-            results['plots']['impulse_response'] = sys.step_response()
+            results['plots']['impulse_response'] = sys.impulse_response()
         if 'step_response' in plots:
             results['plots']['step_response'] = sys.step_response()
         if 'pzmap' in plots:

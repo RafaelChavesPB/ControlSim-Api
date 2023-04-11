@@ -96,18 +96,18 @@ class System:
     @plot_decorator
     def step_response(self, *args, **kwargs):
         x, y = co.step_response(self.__amplitude*self.__system)
-        plt.plot(x, y, label="Saida")
-        plt.plot(x, [self.__amplitude]*len(x), label="Entrada")
+        plt.plot(x, y, label="Saida", color="orange")
+        plt.plot(x, [self.__amplitude]*len(x), label="Degrau")
         plt.ylabel('Amplitude')
         plt.xlabel('Tempo(s)')
         plt.legend()
         plt.grid()
 
     @plot_decorator
-    def impulso_response(self, *args, **kwargs):
+    def impulse_response(self, *args, **kwargs):
         x, y = co.impulse_response(self.__amplitude*self.__system)
-        plt.plot(x, y, label="Saida")
-        plt.stem(x, [self.__amplitude], label="Entrada")
+        plt.stem([0], [self.__amplitude], label="Impulso")
+        plt.plot(x, y, label="Saida", color="orange")
         plt.ylabel('Amplitude')
         plt.xlabel('Tempo(s)')
         plt.legend()
