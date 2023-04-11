@@ -83,8 +83,9 @@ def process_data(data: dict) -> System:
     den = get_poly(system_data['den'], system_data.get(
         'den_type'))
 
+    amplitude = float(data.get('amplitude', 1))
     feedback = data.get('feedback', False)
-    sys = System(num, den, feedback, gain)
+    sys = System(num, den, gain, amplitude, feedback)
 
     # Recebe e trata as informações do compensador (caso exista)
     if 'comp' in data:    
@@ -136,6 +137,8 @@ def process_simulations(data: dict, sys: System) -> dict:
 
     if 'plots' in data:
         plots = data['plots']
+        if 'impulse_response' in plots:
+            results['plots']['impulse_response'] = sys.step_response()
         if 'step_response' in plots:
             results['plots']['step_response'] = sys.step_response()
         if 'pzmap' in plots:

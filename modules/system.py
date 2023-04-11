@@ -11,14 +11,15 @@ matplotlib.use("Agg")
 
 
 class System:
-    def __init__(self, num: list, den: list, feedback: bool = False, gain: float = 1, delay : int = 0) -> None:
+    def __init__(self, num: list, den: list, gain: float = 1, amplitude: float = 1, feedback: bool = False, delay: int = 0) -> None:
         self.__num = num
         self.__den = den
         self.__delay = delay
         self.__gs = gain*co.tf(num, den)
         self.__comp = co.tf(1, 1)
         self.__pid = co.tf(1, 1)
-        self.__pade = co.tf(1 , 1)
+        self.__pade = co.tf(1, 1)
+        self.__amplitude = amplitude
         self.__feedback = feedback
         self.__kgain = 1
         self.__put_delay()
@@ -28,11 +29,12 @@ class System:
         self.__open_loop = self.__kgain*self.__gs*self.__comp*self.__pid*self.__pade
         self.__closed_loop = co.feedback(self.__open_loop)
         self.__system = self.__closed_loop if self.__feedback else self.__open_loop
-    
+
     def __put_delay(self) -> None:
         if self.__delay > 0:
-            num,den = co.pade(T = self.__delay, n = 3, numdeg = 3) # mude isso se você quiser mudar o grau do aproximador do padé
-            self.__pade = co.tf(num,den)
+            # mude isso se você quiser mudar o grau do aproximador do padé
+            num, den = co.pade(T=self.__delay, n=3, numdeg=3)
+            self.__pade = co.tf(num, den)
 
     def conf_gs(self, num: list, den: list, gain: float = 1) -> None:
         self.__gs = gain*co.tf(num, den)
@@ -57,7 +59,7 @@ class System:
         tune deve ser skogestad ou não, o tipo de pid deve ser "series" ou "parallel", e o filtro deve ser um valor.
         Se o filtro não for desejado pelo usuário deve ser passado 0."""
         pid_object = pid.PID(num=self.__num, den=self.__den, kp=kp,
-                         ki=ki, kd=kd, tune=tune, type=pid_type, filter=filter, delay = self.__delay)
+                             ki=ki, kd=kd, tune=tune, type=pid_type, filter=filter, delay=self.__delay)
         pid_num, pid_den = pid_object.get_pid_only()
         self.__pid = co.tf(pid_num, pid_den)
         self.__update_system()
@@ -93,10 +95,19 @@ class System:
 
     @plot_decorator
     def step_response(self, *args, **kwargs):
-        step = kwargs.get('step', 1)
-        x, y = co.step_response(self.__system)
+        x, y = co.step_response(self.__amplitude*self.__system)
         plt.plot(x, y, label="Saida")
-        plt.plot(x, [step]*len(x), label="Entrada")
+        plt.plot(x, [self.__amplitude]*len(x), label="Entrada")
+        plt.ylabel('Amplitude')
+        plt.xlabel('Tempo(s)')
+        plt.legend()
+        plt.grid()
+
+    @plot_decorator
+    def impulso_response(self, *args, **kwargs):
+        x, y = co.impulse_response(self.__amplitude*self.__system)
+        plt.plot(x, y, label="Saida")
+        plt.stem(x, [self.__amplitude], label="Entrada")
         plt.ylabel('Amplitude')
         plt.xlabel('Tempo(s)')
         plt.legend()
