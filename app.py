@@ -47,10 +47,15 @@ def get_poly(str_input, type):
 
 
 def process_data(data: dict) -> System:
+
+    # Recebe e trata as informações do sistema
     if 'system' not in data:
         raise Exception("Dados do sistema não informados.")
 
     system_data = data['system']
+   
+    gain = float(system_data.get('gain', 1))
+
     if 'num' not in system_data:
         raise Exception("Numerador do sistema não informado.")
     if 'den' not in system_data:
@@ -78,12 +83,13 @@ def process_data(data: dict) -> System:
     den = get_poly(system_data['den'], system_data.get(
         'den_type'))
 
-    gain = float(system_data.get('gain', 1))
     feedback = data.get('feedback', False)
     sys = System(num, den, feedback, gain)
 
-    if 'comp' in data:
+    # Recebe e trata as informações do compensador (caso exista)
+    if 'comp' in data:    
         comp_data = data['comp']
+        gain_comp = float(comp_data.get('gain', 1))
         if 'num' not in comp_data:
             raise Exception("Numerador do compensador não informado.")
         if 'den' not in comp_data:
@@ -108,9 +114,9 @@ def process_data(data: dict) -> System:
             raise Exception(
                 f'{field.capitalize()} do compensador possui caracteres incompatíveis.')
 
-        gain_comp = float(comp_data.get('gain', 1))
         sys.conf_comp(num_comp, den_comp, gain_comp)
 
+    # Recebe e trata as informações do PID (caso exista)
     if 'pid' in data:
         pid_data = data['pid']
         kp = float(pid_data.get('kp', 0))
