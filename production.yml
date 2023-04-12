@@ -1,9 +1,7 @@
 version: '3'
 services:
   back:
+    image: rafaelchavesaec/controlsim-api:latest
     container_name: controlsim-api
-    pull_policy: build
-    build: .
     ports:
       -  "8082:5000"
-
